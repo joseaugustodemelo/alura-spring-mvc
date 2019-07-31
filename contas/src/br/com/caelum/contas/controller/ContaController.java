@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,6 +18,14 @@ import br.com.caelum.contas.modelo.Conta;
 @Controller
 public class ContaController {
 
+	private ContaDAO contaDao;
+
+	@Autowired
+	public ContaController(ContaDAO contaDao) {
+		super();
+		this.contaDao = contaDao;
+	}
+
 	@RequestMapping("/form")
 	public String formulario() {
 		return "formulario";
@@ -24,34 +33,32 @@ public class ContaController {
 
 	@RequestMapping("/adicionarConta")
 	public String adiciona(@Valid Conta conta, BindingResult bindingResult) {
-		
-		/*if(bindingResult.hasErrors()) {
-			return "formulario";
-		}*/
-		
-		if (bindingResult.hasFieldErrors("descricao")) {
-            return "formulario";
-        }
 
-		ContaDAO contaDAO = new ContaDAO();
-		contaDAO.adiciona(conta);
+		/*
+		 * if(bindingResult.hasErrors()) { return "formulario"; }
+		 */
+
+		if (bindingResult.hasFieldErrors("descricao")) {
+			return "formulario";
+		}
+
+		this.contaDao.adiciona(conta);
 		return "conta-adicionada";
 	}
 
 	@RequestMapping("/pagarConta")
 	public void pagar(Conta conta, HttpServletResponse response) {
-		ContaDAO dao = new ContaDAO();
-		
-		dao.paga(conta.getId());
-		
+
+		this.contaDao.paga(conta.getId());
+
 		response.setStatus(200);
-		//return "redirect:listaContas";
+		// return "redirect:listaContas";
 	}
-	
+
 	@RequestMapping("/listaContas")
 	public ModelAndView lista() {
-		ContaDAO dao = new ContaDAO();
-		List<Conta> contas = dao.lista();
+
+		List<Conta> contas = this.contaDao.lista();
 
 		ModelAndView mv = new ModelAndView("conta/lista");
 		mv.addObject("contas", contas);
@@ -61,8 +68,7 @@ public class ContaController {
 	@RequestMapping("/removerConta")
 	public String remove(Conta conta) {
 
-		ContaDAO contaDAO = new ContaDAO();
-		contaDAO.remove(conta);
+		this.contaDao.remove(conta);
 
 		// return "forward:listaContas";
 		return "redirect:listaContas";
@@ -70,15 +76,15 @@ public class ContaController {
 
 	@RequestMapping("/mostraConta")
 	public String mostra(Long id, Model model) {
-		ContaDAO dao = new ContaDAO();
-		model.addAttribute("conta", dao.buscaPorId(id));
+
+		model.addAttribute("conta", this.contaDao.buscaPorId(id));
 		return "conta/mostra";
 	}
 
 	@RequestMapping("/alteraConta")
 	public String altera(Conta conta) {
-		ContaDAO dao = new ContaDAO();
-		dao.altera(conta);
+
+		this.contaDao.altera(conta);
 		return "redirect:listaContas";
 	}
 }

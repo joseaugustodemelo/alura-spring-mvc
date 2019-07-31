@@ -14,6 +14,10 @@
 				$("#conta_"+id).html("Paga!");
 		    });
 	}
+	
+	soma => (a, b) {
+		return a + b;
+	}
 
 </script>
 
